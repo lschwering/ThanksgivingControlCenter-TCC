@@ -460,7 +460,7 @@
       flex-wrap: wrap;
     }
 
-    #add-item-btn {
+    #add-item-btn, #clear-list-btn {
       border-radius: 999px;
       border: 1px solid rgba(148,163,184,0.6);
       background: rgba(15,23,42,0.9);
@@ -471,53 +471,24 @@
     }
 
     #clear-list-btn {
-      border-radius: 999px;
-      border: 1px solid rgba(248,113,113,0.7);
+      border-color: rgba(248,113,113,0.7);
       background: rgba(127,29,29,0.7);
-      padding: 5px 12px;
-      font-size: 0.8rem;
       color: #fee2e2;
-      cursor: pointer;
     }
 
-    #shopping-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: radial-gradient(circle at top left, rgba(15,23,42,0.95), rgba(15,23,42,0.9));
-    }
-
-    #shopping-list li {
-      padding: 6px 10px;
-      border-bottom: 1px solid rgba(30,64,175,0.4);
-      font-size: 0.82rem;
-      outline: none;
-      cursor: text;
-    }
-
-    #shopping-list li:last-child {
-      border-bottom: none;
-    }
-
-    #shopping-list li:focus {
-      background: rgba(56,189,248,0.18);
+    #add-item-category {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(15,23,42,0.9);
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      color: #e5e7eb;
     }
 
     .shopping-note {
       font-size: 0.78rem;
       color: var(--muted);
       margin-top: 6px;
-    }
-
-    .unit-badge {
-      font-size: 0.68rem;
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.6);
-      color: var(--muted);
-      margin-left: 4px;
     }
   </style>
 </head>
@@ -1136,7 +1107,7 @@
         </div>
 
         <div id="shopping-list-container">
-          <!-- JS will render category sections here -->
+          <!-- JS renders category sections here -->
         </div>
 
         <p class="shopping-note">
@@ -1171,7 +1142,7 @@
     toggles.forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.recipe;
-        const body = document.getElementById(`recipe-${id}`);
+        const body = document.getElementById(\`recipe-\${id}\`);
         const isOpen = body.classList.toggle('open');
         btn.textContent = isOpen ? 'Hide details ▴' : 'Details ▾';
       });
@@ -1188,7 +1159,7 @@
       document.querySelectorAll('.temp-val').forEach(span => {
         const f = parseInt(span.dataset.f, 10);
         const unitSpan = span.parentElement.querySelector('.temp-unit');
-        if (!unitSpan) return;
+        if (!unitSpan || isNaN(f)) return;
         if (toCelsius) {
           const c = fToC(f);
           span.textContent = c;
@@ -1225,7 +1196,6 @@
         }
       }
       if (shoppingData.length === 0) {
-        // default items on first load
         shoppingData = [
           { id: 1, text: "12 lb turkey (spatchcock)", category: "Meat & Fish", checked: false },
           { id: 2, text: "Ribeye steaks · 2 pcs, thick cut", category: "Meat & Fish", checked: false },
@@ -1323,7 +1293,6 @@
           list.appendChild(li);
         });
 
-        // remove last border
         if (list.lastChild) {
           list.lastChild.style.borderBottom = 'none';
         }
@@ -1354,18 +1323,16 @@
       });
     }
 
-
     // ===== On load: restore settings =====
     document.addEventListener('DOMContentLoaded', () => {
-      // Temperature preference
       const useC = localStorage.getItem('useCelsius') === 'true';
       tempToggle.checked = useC;
       updateTemps(useC);
 
-      // Shopping list
       loadShoppingData();
       renderShoppingList();
     });
   </script>
 </body>
 </html>
+
