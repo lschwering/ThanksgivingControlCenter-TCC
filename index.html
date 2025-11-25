@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thanksgiving Cooking Control Center</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #020617;
+      --accent: #f97316;
+      --accent-soft: rgba(249, 115, 22, 0.15);
+      --accent-2: #22c55e;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --border: #1f2937;
+      --danger: #ef4444;
+      --primary-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--primary-font);
+      background: radial-gradient(circle at top, #1f2937, #020617 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(to right, rgba(15,23,42,0.97), rgba(15,23,42,0.9));
+      border-bottom: 1px solid rgba(148,163,184,0.18);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .title-block h1 {
+      font-size: 1.2rem;
+      margin: 0;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .title-block p {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .nav-btn {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: rgba(15,23,42,0.8);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .nav-btn span.icon {
+      font-size: 0.9rem;
+    }
+
+    .nav-btn.active {
+      color: #fefce8;
+      background: radial-gradient(circle at top left, #f97316, #ea580c);
+      border-color: rgba(248,250,252,0.2);
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.8), 0 10px 25px rgba(0,0,0,0.45);
+    }
+
+    .temp-switch {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .temp-switch input {
+      accent-color: var(--accent);
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 18px auto 32px;
+      padding: 0 18px 32px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.9), rgba(2,6,23,1));
+      border-radius: 18px;
+      border: 1px solid rgba(30,64,175,0.4);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+      padding: 18px 18px 16px;
+      margin-bottom: 18px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(15,118,110,0.18);
+      color: #a5f3fc;
+      border: 1px solid rgba(45,212,191,0.4);
+      white-space: nowrap;
+    }
+
+    .subtext {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .pill {
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.12);
+      color: #cbd5f5;
+      border: 1px solid rgba(51,65,85,0.9);
+    }
+
+    /* Schedule table */
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 0.82rem;
+    }
+
+    .schedule-table th,
+    .schedule-table td {
+      padding: 6px 6px;
+      text-align: left;
+    }
+
+    .schedule-table thead {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .schedule-table tbody tr:nth-child(odd) {
+      background: rgba(15,23,42,0.8);
+    }
+
+    .schedule-table tbody tr:nth-child(even) {
+      background: rgba(15,23,42,0.4);
+    }
+
+    .station-tag {
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .station-grill { background: rgba(249,115,22,0.15); border-color: rgba(249,115,22,0.7); color: #fed7aa; }
+    .station-large-oven { background: rgba(239,68,68,0.1); border-color: rgba(248,113,113,0.7); color: #fecaca; }
+    .station-small-oven { background: rgba(59,130,246,0.12); border-color: rgba(96,165,250,0.7); color: #bfdbfe; }
+    .station-stovetop { background: rgba(34,197,94,0.12); border-color: rgba(74,222,128,0.7); color: #bbf7d0; }
+    .station-slowcooker { background: rgba(244,114,182,0.12); border-color: rgba(244,114,182,0.7); color: #f9a8d4; }
+
+    /* Timeline */
+    .timeline-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 4px;
+      font-size: 0.75rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      border: 1px solid rgba(148,163,184,0.7);
+    }
+
+    .legend-grill { background: linear-gradient(135deg, #f97316, #fb923c); }
+    .legend-large-oven { background: linear-gradient(135deg, #ef4444, #f97316); }
+    .legend-small-oven { background: linear-gradient(135deg, #3b82f6, #38bdf8); }
+    .legend-stovetop { background: linear-gradient(135deg, #22c55e, #4ade80); }
+    .legend-slowcooker { background: linear-gradient(135deg, #ec4899, #f97316); }
+
+    .timeline-grid {
+      margin-top: 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 10px;
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.95), rgba(15,23,42,0.9));
+    }
+
+    .timeline-header,
+    .timeline-row {
+      display: grid;
+      grid-template-columns: 5.5rem 1fr;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+
+    .timeline-header {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .time-label {
+      font-variant-numeric: tabular-nums;
+      color: #e5e7eb;
+    }
+
+    .bar-wrapper {
+      position: relative;
+      height: 20px;
+      background: linear-gradient(to right, rgba(15,23,42,0.9), rgba(15,23,42,0.6));
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      padding: 0 4px;
+      white-space: nowrap;
+    }
+
+    .bar.ribs { background: linear-gradient(90deg, #facc15, #f97316); }
+    .bar.augratin { background: linear-gradient(90deg, #38bdf8, #6366f1); }
+    .bar.bakedpot { background: linear-gradient(90deg, #a855f7, #ec4899); }
+    .bar.mash { background: linear-gradient(90deg, #22c55e, #84cc16); }
+    .bar.carrots { background: linear-gradient(90deg, #fb923c, #f97316); }
+    .bar.turkey { background: linear-gradient(90deg, #f97316, #ef4444); }
+    .bar.steak { background: linear-gradient(90deg, #22c55e, #14b8a6); }
+
+    /* Stations overview */
+    .stations-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    @media (min-width: 900px) {
+      .stations-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+    }
+
+    .station-card {
+      background: radial-gradient(circle at top, rgba(15,23,42,0.98), rgba(15,23,42,0.92));
+      border-radius: 14px;
+      border: 1px solid rgba(30,64,175,0.5);
+      padding: 12px;
+      font-size: 0.8rem;
+    }
+
+    .station-card h3 {
+      margin: 0 0 6px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .station-chip {
+      font-size: 0.65rem;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      color: var(--muted);
+    }
+
+    .station-list {
+      list-style: none;
+      margin: 0;
+      padding-left: 13px;
+    }
+
+    .station-list li {
+      margin: 3px 0;
+    }
+
+    /* Recipes & shopping */
+    .recipes-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    @media (min-width: 800px) {
+      .recipes-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .recipe-card {
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.96), rgba(15,23,42,0.92));
+      border-radius: 16px;
+      border: 1px solid rgba(30,64,175,0.5);
+      padding: 14px 14px 12px;
+      font-size: 0.82rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .recipe-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .recipe-title {
+      font-weight: 600;
+    }
+
+    .toggle-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(15,23,42,0.7);
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      color: #e5e7eb;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .recipe-body {
+      display: none;
+      margin-top: 3px;
+      color: #e5e7eb;
+    }
+
+    .recipe-body.open {
+      display: block;
+    }
+
+    .recipe-body h4 {
+      margin: 6px 0 4px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .recipe-body ul {
+      margin: 0 0 4px 16px;
+      padding-left: 4px;
+    }
+
+    .recipe-body li {
+      margin-bottom: 3px;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .hero-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Shopping list */
+    .shopping-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    #add-item-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(15,23,42,0.9);
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+
+    #clear-list-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(248,113,113,0.7);
+      background: rgba(127,29,29,0.7);
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      color: #fee2e2;
+      cursor: pointer;
+    }
+
+    #shopping-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.95), rgba(15,23,42,0.9));
+    }
+
+    #shopping-list li {
+      padding: 6px 10px;
+      border-bottom: 1px solid rgba(30,64,175,0.4);
+      font-size: 0.82rem;
+      outline: none;
+      cursor: text;
+    }
+
+    #shopping-list li:last-child {
+      border-bottom: none;
+    }
+
+    #shopping-list li:focus {
+      background: rgba(56,189,248,0.18);
+    }
+
+    .shopping-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .unit-badge {
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      color: var(--muted);
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="title-block">
+        <h1>Thanksgiving Cooking Control Center</h1>
+        <p>Dinner at 4:00 PM · 12 lb Spatchcock Turkey · Slow-Cooker Ribs · Ribeyes · Full Side Lineup</p>
+      </div>
+      <nav>
+        <button class="nav-btn active" data-target="schedule"><span class="icon">📋</span>Schedule</button>
+        <button class="nav-btn" data-target="timeline"><span class="icon">📈</span>Timeline</button>
+        <button class="nav-btn" data-target="stations"><span class="icon">🍳</span>Stations</button>
+        <button class="nav-btn" data-target="recipes"><span class="icon">📖</span>Recipes</button>
+        <button class="nav-btn" data-target="shopping"><span class="icon">🛒</span>Shopping</button>
+      </nav>
+      <div class="temp-switch">
+        <label>
+          <input type="checkbox" id="temp-toggle" />
+          Show °C
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- SCHEDULE SECTION -->
+    <section id="schedule" class="section active">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">One-Page Day-Of Schedule</div>
+            <p class="subtext">Built for: slow-cooker ribs (7h + 15–20 min broil), turkey rest + re-crisp, and a 4:00 PM sit-down.</p>
+          </div>
+          <span class="badge">Game Plan</span>
+        </div>
+
+        <table class="schedule-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Task</th>
+              <th>Where</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>08:00</td>
+              <td>Start ribs – 7 hours low in slow cooker</td>
+              <td><span class="station-tag station-slowcooker">Slow Cooker</span></td>
+              <td>Season, add a little liquid, set to LOW (target 7h).</td>
+            </tr>
+            <tr>
+              <td>09:00</td>
+              <td>French Onion Potatoes au Gratin – start bake (2h45 at
+                <span class="temp-val" data-f="375">375</span>°<span class="temp-unit">F</span>)
+              </td>
+              <td><span class="station-tag station-large-oven">Large Oven</span></td>
+              <td>9×13" dish. Caramelized onions + cheese sauce + potatoes.</td>
+            </tr>
+            <tr>
+              <td>11:45</td>
+              <td>Au Gratin finished – rest covered</td>
+              <td><span class="station-tag station-large-oven">Large Oven → Counter</span></td>
+              <td>They hold heat very well; tent loosely with foil.</td>
+            </tr>
+            <tr>
+              <td>11:30</td>
+              <td>Whole potatoes for Baked Stuffed Potatoes – first bake (1–1.25h at
+                <span class="temp-val" data-f="375">375</span>°<span class="temp-unit">F</span>)
+              </td>
+              <td><span class="station-tag station-small-oven">Small Oven</span></td>
+              <td>Fork tender before scooping later.</td>
+            </tr>
+            <tr>
+              <td>12:45</td>
+              <td>Take potatoes out, cool slightly; assemble Baked Stuffed Potatoes</td>
+              <td><span class="station-tag station-stovetop">Counter / Prep</span></td>
+              <td>Mix with cheddar, sour cream, onion flakes, egg; stuff shells.</td>
+            </tr>
+            <tr>
+              <td>13:30</td>
+              <td>Preheat grill to
+                <span class="temp-val" data-f="400">400</span>°<span class="temp-unit">F</span> (375–400 sweet spot) for turkey
+              </td>
+              <td><span class="station-tag station-grill">Grill</span></td>
+              <td>Two zones if you can (hot + slightly cooler).</td>
+            </tr>
+            <tr>
+              <td>13:45</td>
+              <td>12 lb spatchcock turkey on the grill</td>
+              <td><span class="station-tag station-grill">Grill</span></td>
+              <td>Target ~1h15; pull when breast is 160–165°F.</td>
+            </tr>
+            <tr>
+              <td>13:45</td>
+              <td>Baked Stuffed Potatoes – final bake (1h at
+                <span class="temp-val" data-f="350">350</span>°<span class="temp-unit">F</span>)
+              </td>
+              <td><span class="station-tag station-large-oven">Large Oven</span></td>
+              <td>Drop oven from 375°F to 350°F after Au Gratin, bake 13:45–14:45.</td>
+            </tr>
+            <tr>
+              <td>14:00</td>
+              <td>Quick break / table setup / sanity check</td>
+              <td><span class="station-tag station-stovetop">You</span></td>
+              <td>Look at appliances, check timers, breathe.</td>
+            </tr>
+            <tr>
+              <td>14:45</td>
+              <td>Stuffed potatoes done – keep warm</td>
+              <td><span class="station-tag station-large-oven">Large Oven (OFF)</span></td>
+              <td>Turn oven off, leave potatoes inside covered.</td>
+            </tr>
+            <tr>
+              <td>15:00</td>
+              <td>Ribs come out of slow cooker</td>
+              <td><span class="station-tag station-slowcooker">Slow Cooker → Large Oven</span></td>
+              <td>Place on sheet pan, sauce if desired.</td>
+            </tr>
+            <tr>
+              <td>15:00–15:15</td>
+              <td>Broil ribs 15–20 min for color & crust (HIGH broil)</td>
+              <td><span class="station-tag station-large-oven">Large Oven</span></td>
+              <td>Watch closely; rotate pan if needed.</td>
+            </tr>
+            <tr>
+              <td>15:00</td>
+              <td>Turkey comes off grill – rest at least 30 min</td>
+              <td><span class="station-tag station-grill">Grill → Resting board</span></td>
+              <td>Tent loosely with foil; don’t seal tight so skin doesn’t steam.</td>
+            </tr>
+            <tr>
+              <td>14:30</td>
+              <td>Start mashed potatoes</td>
+              <td><span class="station-tag station-stovetop">Stovetop</span></td>
+              <td>~15 min simmer, then mash with hot cream & lots of butter.</td>
+            </tr>
+            <tr>
+              <td>15:00</td>
+              <td>Roast carrots (30 min at
+                <span class="temp-val" data-f="400">400</span>°<span class="temp-unit">F</span>)
+              </td>
+              <td><span class="station-tag station-small-oven">Small Oven</span></td>
+              <td>Don’t sauce yet – just roast.</td>
+            </tr>
+            <tr>
+              <td>15:15</td>
+              <td>Ribs out of oven – rest until carving</td>
+              <td><span class="station-tag station-large-oven">Counter</span></td>
+              <td>Tent lightly; they’ll stay hot.</td>
+            </tr>
+            <tr>
+              <td>15:20–15:30</td>
+              <td>Finish honey herb butter & toss roasted carrots</td>
+              <td><span class="station-tag station-stovetop">Stovetop</span></td>
+              <td>Melt butter, whisk in honey, vinegar, Dijon, herbs; toss carrots.</td>
+            </tr>
+            <tr>
+              <td>15:30–15:40</td>
+              <td>Re-crisp turkey at very high heat</td>
+              <td><span class="station-tag station-large-oven">Large Oven</span></td>
+              <td>Un-tent, blast at
+                <span class="temp-val" data-f="475">475</span>°<span class="temp-unit">F</span> or broil 5–10 min; then pull to carve.
+              </td>
+            </tr>
+            <tr>
+              <td>15:40</td>
+              <td>Sear ribeye steaks (10–15 min total)</td>
+              <td><span class="station-tag station-grill">Grill / Cast Iron</span></td>
+              <td>High heat, 3–4 min per side; rest a few minutes.</td>
+            </tr>
+            <tr>
+              <td>15:45–16:00</td>
+              <td>Slice turkey & ribs, move everything to serving dishes</td>
+              <td><span class="station-tag station-stovetop">Carving / Serving</span></td>
+              <td>You’re eating at 4:00! 🦃🥂</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pill-row">
+          <span class="pill">The slow cooker frees up your big oven in the morning; all oven crunch-time is between 13:45 and 15:40.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIMELINE SECTION -->
+    <section id="timeline" class="section">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Visual Timeline (08:00–16:00)</div>
+            <p class="subtext">Shows when each appliance is busy so you never double-book the ovens or grill.</p>
+          </div>
+          <span class="badge">Macro View</span>
+        </div>
+
+        <div class="timeline-legend">
+          <div class="legend-item"><span class="legend-color legend-slowcooker"></span> Slow Cooker</div>
+          <div class="legend-item"><span class="legend-color legend-large-oven"></span> Large Oven</div>
+          <div class="legend-item"><span class="legend-color legend-small-oven"></span> Small Oven</div>
+          <div class="legend-item"><span class="legend-color legend-grill"></span> Grill</div>
+          <div class="legend-item"><span class="legend-color legend-stovetop"></span> Stovetop / Prep</div>
+        </div>
+
+        <div class="timeline-grid">
+          <div class="timeline-header">
+            <div>Local Time</div>
+            <div>What’s Running</div>
+          </div>
+
+          <!-- Ribs slow-cooker -->
+          <div class="timeline-row">
+            <div class="time-label">08:00</div>
+            <div class="bar-wrapper">
+              <div class="bar ribs" style="left:0%; width:75%;">Ribs 08:00–15:00 (Slow Cooker)</div>
+            </div>
+          </div>
+
+          <!-- Au gratin -->
+          <div class="timeline-row">
+            <div class="time-label">09:00</div>
+            <div class="bar-wrapper">
+              <div class="bar augratin" style="left:10%; width:30%;">Au Gratin 09:00–11:45 (Large Oven)</div>
+            </div>
+          </div>
+
+          <!-- First-bake potatoes -->
+          <div class="timeline-row">
+            <div class="time-label">11:30</div>
+            <div class="bar-wrapper">
+              <div class="bar bakedpot" style="left:35%; width:18%;">Whole Potatoes 11:30–12:45 (Small Oven)</div>
+            </div>
+          </div>
+
+          <!-- Stuffed potatoes final bake -->
+          <div class="timeline-row">
+            <div class="time-label">13:45</div>
+            <div class="bar-wrapper">
+              <div class="bar bakedpot" style="left:55%; width:20%;">Stuffed Potatoes 13:45–14:45 (Large Oven)</div>
+            </div>
+          </div>
+
+          <!-- Turkey cook & rest & crisp -->
+          <div class="timeline-row">
+            <div class="time-label">13:45</div>
+            <div class="bar-wrapper">
+              <div class="bar turkey" style="left:55%; width:16%;">Turkey on Grill 13:45–15:00</div>
+            </div>
+          </div>
+
+          <!-- Ribs broil -->
+          <div class="timeline-row">
+            <div class="time-label">15:00</div>
+            <div class="bar-wrapper">
+              <div class="bar ribs" style="left:75%; width:7%;">Ribs Broil 15:00–15:15</div>
+            </div>
+          </div>
+
+          <!-- Mashed potatoes -->
+          <div class="timeline-row">
+            <div class="time-label">14:30</div>
+            <div class="bar-wrapper">
+              <div class="bar mash" style="left:70%; width:9%;">Mash 14:30–15:05 (Stovetop)</div>
+            </div>
+          </div>
+
+          <!-- Carrots -->
+          <div class="timeline-row">
+            <div class="time-label">15:00</div>
+            <div class="bar-wrapper">
+              <div class="bar carrots" style="left:75%; width:7%;">Carrots 15:00–15:30 (Small Oven)</div>
+            </div>
+          </div>
+
+          <!-- Turkey re-crisp + steaks -->
+          <div class="timeline-row">
+            <div class="time-label">15:30</div>
+            <div class="bar-wrapper">
+              <div class="bar turkey" style="left:82%; width:5%;">Turkey Crisp 15:30–15:40 (Large Oven)</div>
+            </div>
+          </div>
+
+          <div class="timeline-row">
+            <div class="time-label">15:40</div>
+            <div class="bar-wrapper">
+              <div class="bar steak" style="left:88%; width:6%;">Ribeyes 15:40–15:55 (Grill)</div>
+            </div>
+          </div>
+        </div>
+
+        <p class="hero-note">
+          The key: slow cooker handles ribs all day, big oven carries Au Gratin → stuffed potatoes → ribs broil → turkey crisp,
+          while the small oven takes first-bake potatoes and carrots.
+        </p>
+      </div>
+    </section>
+
+    <!-- STATIONS SECTION -->
+    <section id="stations" class="section">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Kitchen Station Color Codes</div>
+            <p class="subtext">Now with a dedicated slow-cooker boss so your ovens stay free.</p>
+          </div>
+          <span class="badge">Crew Layout</span>
+        </div>
+
+        <div class="stations-grid">
+          <div class="station-card">
+            <h3>🔥 Grill Chief <span class="station-chip">Color: Orange</span></h3>
+            <ul class="station-list">
+              <li>Preheat grill 13:30.</li>
+              <li>Manage 12 lb spatchcock turkey 13:45–15:00.</li>
+              <li>After turkey comes off, keep grill ready for ribeyes.</li>
+              <li>Sear ribeye steaks 15:40–15:55, then rest.</li>
+            </ul>
+          </div>
+
+          <div class="station-card">
+            <h3>🟥 Large Oven Lead <span class="station-chip">Color: Red</span></h3>
+            <ul class="station-list">
+              <li>Au Gratin 09:00–11:45 at
+                <span class="temp-val" data-f="375">375</span>°<span class="temp-unit">F</span>.
+              </li>
+              <li>Stuffed potatoes 13:45–14:45 at
+                <span class="temp-val" data-f="350">350</span>°<span class="temp-unit">F</span>.
+              </li>
+              <li>Broil ribs 15:00–15:15.</li>
+              <li>Re-crisp turkey 15:30–15:40 at
+                <span class="temp-val" data-f="475">475</span>°<span class="temp-unit">F</span> or broil.
+              </li>
+            </ul>
+          </div>
+
+          <div class="station-card">
+            <h3>🔵 Small Oven Lead <span class="station-chip">Color: Blue</span></h3>
+            <ul class="station-list">
+              <li>Whole potato first bake 11:30–12:45 at
+                <span class="temp-val" data-f="375">375</span>°<span class="temp-unit">F</span>.
+              </li>
+              <li>Roasted carrots 15:00–15:30 at
+                <span class="temp-val" data-f="400">400</span>°<span class="temp-unit">F</span>.
+              </li>
+              <li>Use spare time to hold sides warm if needed.</li>
+            </ul>
+          </div>
+
+          <div class="station-card">
+            <h3>🟢 Stovetop / Prep Captain <span class="station-chip">Color: Green</span></h3>
+            <ul class="station-list">
+              <li>Assemble Baked Stuffed Potatoes 12:45–13:15.</li>
+              <li>Make mashed potatoes 14:30–15:05.</li>
+              <li>Make honey-herb butter & toss carrots 15:20–15:30.</li>
+              <li>Carving help and final plating 15:45–16:00.</li>
+            </ul>
+          </div>
+
+          <div class="station-card">
+            <h3>💗 Slow-Cooker Boss <span class="station-chip">Color: Pink</span></h3>
+            <ul class="station-list">
+              <li>Season & load ribs into slow cooker at 08:00.</li>
+              <li>Check once or twice, but mostly hands-off 08:00–15:00.</li>
+              <li>Move ribs to sheet pan at 15:00 for broil.</li>
+              <li>After broil, tent and guard from people stealing pieces.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECIPES SECTION -->
+    <section id="recipes" class="section">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Recipe Reference (Quick Version)</div>
+            <p class="subtext">Key steps only, so you’re not scrolling through blog life-stories on Thanksgiving.</p>
+          </div>
+          <span class="badge">Cheat Sheets</span>
+        </div>
+
+        <div class="recipes-grid">
+
+          <!-- Steak Recipe -->
+          <article class="recipe-card">
+            <div class="recipe-header">
+              <div>
+                <div class="recipe-title">Ribeye Steaks (Grill or Cast Iron)</div>
+                <div class="hint">High heat · 10–15 min total</div>
+              </div>
+              <button class="toggle-btn" data-recipe="steak">Details ▾</button>
+            </div>
+            <div class="recipe-body" id="recipe-steak">
+              <h4>Seasoning</h4>
+              <ul>
+                <li>Pat steaks dry.</li>
+                <li>Salt generously 45–60 min before cooking (dry brine).</li>
+                <li>Just before cooking: black pepper + a thin coat of oil.</li>
+              </ul>
+              <h4>Grill Method</h4>
+              <ul>
+                <li>Preheat grill on HIGH (
+                  <span class="temp-val" data-f="550">550</span>°<span class="temp-unit">F</span>+ ideally).
+                </li>
+                <li>Sear 3–4 min per side for medium-rare, depending on thickness.</li>
+                <li>Advanced: reverse sear – cook indirect at
+                  <span class="temp-val" data-f="225">225</span>°<span class="temp-unit">F</span> to ~110°F internal,
+                  then finish over high flame.
+                </li>
+              </ul>
+              <h4>Cast Iron Method</h4>
+              <ul>
+                <li>Heat cast iron until just smoking.</li>
+                <li>Add high-heat oil; sear 2–3 min per side.</li>
+                <li>For last minute: add butter + smashed garlic + rosemary and baste.</li>
+              </ul>
+              <h4>Finish</h4>
+              <ul>
+                <li>Target internal: 125°F rare · 135°F medium-rare · 145°F medium.</li>
+                <li>Rest 5 minutes before slicing to keep juices in.</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Slow Cooker Ribs -->
+          <article class="recipe-card">
+            <div class="recipe-header">
+              <div>
+                <div class="recipe-title">Slow Cooker BBQ Ribs</div>
+                <div class="hint">7h LOW + 15–20 min broil</div>
+              </div>
+              <button class="toggle-btn" data-recipe="ribs">Details ▾</button>
+            </div>
+            <div class="recipe-body" id="recipe-ribs">
+              <h4>Prep</h4>
+              <ul>
+                <li>Remove membrane from back of ribs.</li>
+                <li>Season heavily with dry rub (salt, pepper, paprika, garlic powder, brown sugar, chili powder).</li>
+                <li>Optional: add ~1/4 cup apple juice or broth to slow cooker for moisture.</li>
+              </ul>
+              <h4>Slow Cooker</h4>
+              <ul>
+                <li>Place ribs standing or curled around inside of slow cooker.</li>
+                <li>Cook 7 hours on LOW until very tender.</li>
+              </ul>
+              <h4>Broil Finish</h4>
+              <ul>
+                <li>Transfer ribs to a foil-lined sheet pan.</li>
+                <li>Brush generously with BBQ sauce.</li>
+                <li>Broil on HIGH 15–20 minutes until caramelized and a bit charred on edges.</li>
+              </ul>
+              <h4>Serve</h4>
+              <ul>
+                <li>Rest 5–10 minutes so they don’t fall apart too fast.</li>
+                <li>Slice between bones and serve with extra sauce.</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Baked Stuffed Potatoes -->
+          <article class="recipe-card">
+            <div class="recipe-header">
+              <div>
+                <div class="recipe-title">Baked Stuffed Potatoes</div>
+                <div class="hint">Family card · 2-step bake</div>
+              </div>
+              <button class="toggle-btn" data-recipe="potatoes">Details ▾</button>
+            </div>
+            <div class="recipe-body" id="recipe-potatoes">
+              <h4>Oven Plan</h4>
+              <ul>
+                <li>First bake: 8–10 potatoes 1–1.25h at
+                  <span class="temp-val" data-f="375">375</span>°<span class="temp-unit">F</span> (11:30–12:45).
+                </li>
+                <li>Final bake: stuffed shells 1h at
+                  <span class="temp-val" data-f="350">350</span>°<span class="temp-unit">F</span> (13:45–14:45).
+                </li>
+              </ul>
+              <h4>Filling</h4>
+              <ul>
+                <li>Scooped potato, shredded cheddar, sour cream, dried onion flakes, 1 beaten egg.</li>
+                <li>Season with salt, pepper, paprika.</li>
+              </ul>
+              <h4>Flow</h4>
+              <ul>
+                <li>Midday: first bake → cool slightly → scoop & mix filling → restuff shells.</li>
+                <li>Afternoon: final bake while turkey is on the grill.</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Roasted Carrots -->
+          <article class="recipe-card">
+            <div class="recipe-header">
+              <div>
+                <div class="recipe-title">Roasted Carrots w/ Honey Herb Butter</div>
+                <div class="hint">
+                  <span class="temp-val" data-f="400">400</span>°<span class="temp-unit">F</span> · about 30 min
+                </div>
+              </div>
+              <button class="toggle-btn" data-recipe="carrots">Details ▾</button>
+            </div>
+            <div class="recipe-body" id="recipe-carrots">
+              <h4>Roast</h4>
+              <ul>
+                <li>4 lb carrots, 1" chunks. Toss with olive oil, thyme, salt, pepper.</li>
+                <li>Roast at
+                  <span class="temp-val" data-f="400">400</span>°<span class="temp-unit">F</span> ~30 min, flipping once.
+                </li>
+              </ul>
+              <h4>Honey Herb Butter</h4>
+              <ul>
+                <li>Melt butter; whisk in honey, apple cider vinegar, Dijon, pinch of salt.</li>
+                <li>Off heat, stir in chopped parsley + chives.</li>
+              </ul>
+              <h4>Finish</h4>
+              <ul>
+                <li>Toss hot carrots with butter mixture just before serving.</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Mashed Potatoes -->
+          <article class="recipe-card">
+            <div class="recipe-header">
+              <div>
+                <div class="recipe-title">Best Mashed Potatoes</div>
+                <div class="hint">Creamy, buttery, no fuss</div>
+              </div>
+              <button class="toggle-btn" data-recipe="mash">Details ▾</button>
+            </div>
+            <div class="recipe-body" id="recipe-mash">
+              <h4>Core Ratio</h4>
+              <ul>
+                <li>~1.6 lb potatoes (russet or Yukon), garlic optional.</li>
+                <li>Butter: be generous; ~0.13–0.25 cup melted.</li>
+                <li>Warm milk/cream: ~0.4 cup, added gradually.</li>
+              </ul>
+              <h4>Technique</h4>
+              <ul>
+                <li>Simmer chunks ~15 min in salted water until fork-tender.</li>
+                <li>Drain very well, let steam off, then mash by hand.</li>
+                <li>Add melted butter first, then warm cream until fluffy.</li>
+                <li>Season with salt & pepper. Hold warm or reheat, dotted with butter.</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- French Onion Potatoes Au Gratin -->
+          <article class="recipe-card">
+            <div class="recipe-header">
+              <div>
+                <div class="recipe-title">French Onion Potatoes au Gratin</div>
+                <div class="hint">
+                  <span class="temp-val" data-f="375">375</span>°<span class="temp-unit">F</span> · 2h45 total
+                </div>
+              </div>
+              <button class="toggle-btn" data-recipe="augratin">Details ▾</button>
+            </div>
+            <div class="recipe-body" id="recipe-augratin">
+              <h4>Caramelized Onions</h4>
+              <ul>
+                <li>Onions + butter + oil, salt, pepper, sugar, thyme.</li>
+                <li>Cook low & slow, then deglaze with sherry + beef broth.</li>
+              </ul>
+              <h4>Cheese Sauce</h4>
+              <ul>
+                <li>Butter + flour roux → whisk in cream + milk.</li>
+                <li>Season with salt + nutmeg; melt in Gruyère + Swiss.</li>
+              </ul>
+              <h4>Bake</h4>
+              <ul>
+                <li>Toss russet slices in sauce, layer half potatoes, half onions; repeat.</li>
+                <li>Top with reserved cheese + Parmesan.</li>
+                <li>Cover, bake 45–55 min; uncover 20–25 min until golden.</li>
+                <li>Rest 20 min before serving (yours will rest longer but that’s ok).</li>
+              </ul>
+            </div>
+          </article>
+
+        </div>
+
+        <p class="hero-note">
+          If you decide to prep even more on Wednesday, these cards show exactly which steps can move
+          (onions, first-bake potatoes, etc.).
+        </p>
+      </div>
+    </section>
+
+    <!-- SHOPPING SECTION -->
+    <section id="shopping" class="section">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Shopping List</div>
+            <p class="subtext">Editable list that saves in your browser. Click any line to edit.</p>
+          </div>
+          <span class="badge">Groceries</span>
+        </div>
+
+        <div class="shopping-controls">
+          <button id="add-item-btn">+ Add item</button>
+          <button id="clear-list-btn">Clear list</button>
+        </div>
+
+        <ul id="shopping-list">
+          <li contenteditable="true">12 lb turkey (spatchcock)</li>
+          <li contenteditable="true">Ribeye steaks · 2 pcs, thick cut</li>
+          <li contenteditable="true">Pork ribs · 2 racks</li>
+          <li contenteditable="true">Carrots · 4 lb</li>
+          <li contenteditable="true">Potatoes for mash · 5 lb</li>
+          <li contenteditable="true">Potatoes for baked stuffed · 8–10 large</li>
+          <li contenteditable="true">Onions · 5–6 large</li>
+          <li contenteditable="true">Gruyère cheese · 6 oz</li>
+          <li contenteditable="true">Swiss cheese · 6 oz</li>
+          <li contenteditable="true">Cheddar cheese · for stuffed potatoes</li>
+          <li contenteditable="true">Butter · lots</li>
+          <li contenteditable="true">Sour cream</li>
+          <li contenteditable="true">Fresh herbs (thyme, parsley, chives)</li>
+          <li contenteditable="true">Garlic</li>
+          <li contenteditable="true">BBQ sauce</li>
+          <li contenteditable="true">Dry rub spices (paprika, garlic powder, brown sugar, chili, etc.)</li>
+        </ul>
+
+        <p class="shopping-note">
+          – Click any line to edit the text.<br />
+          – Use “+ Add item” for extra things (wine, foil, ice, etc.).<br />
+          – The list auto-saves in this browser on this device.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ===== Navigation between sections =====
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const sections = document.querySelectorAll('.section');
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        navButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        sections.forEach(sec => {
+          sec.classList.toggle('active', sec.id === target);
+        });
+      });
+    });
+
+    // ===== Recipe toggles =====
+    const toggles = document.querySelectorAll('.toggle-btn');
+
+    toggles.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.recipe;
+        const body = document.getElementById(`recipe-${id}`);
+        const isOpen = body.classList.toggle('open');
+        btn.textContent = isOpen ? 'Hide details ▴' : 'Details ▾';
+      });
+    });
+
+    // ===== Temperature unit switch =====
+    const tempToggle = document.getElementById('temp-toggle');
+
+    function fToC(f) {
+      return Math.round((f - 32) * 5 / 9);
+    }
+
+    function updateTemps(toCelsius) {
+      document.querySelectorAll('.temp-val').forEach(span => {
+        const f = parseInt(span.dataset.f, 10);
+        const unitSpan = span.parentElement.querySelector('.temp-unit');
+        if (!unitSpan) return;
+        if (toCelsius) {
+          const c = fToC(f);
+          span.textContent = c;
+          unitSpan.textContent = 'C';
+        } else {
+          span.textContent = f;
+          unitSpan.textContent = 'F';
+        }
+      });
+    }
+
+    tempToggle.addEventListener('change', () => {
+      const toC = tempToggle.checked;
+      updateTemps(toC);
+      localStorage.setItem('useCelsius', toC ? 'true' : 'false');
+    });
+
+    // ===== Shopping list logic =====
+    const addItemBtn = document.getElementById('add-item-btn');
+    const clearListBtn = document.getElementById('clear-list-btn');
+    const shoppingList = document.getElementById('shopping-list');
+
+    function saveShoppingList() {
+      if (!shoppingList) return;
+      localStorage.setItem('thanksgivingShoppingList', shoppingList.innerHTML);
+    }
+
+    function restoreShoppingList() {
+      const saved = localStorage.getItem('thanksgivingShoppingList');
+      if (saved && shoppingList) {
+        shoppingList.innerHTML = saved;
+        // Re-attach contenteditable just in case
+        shoppingList.querySelectorAll('li').forEach(li => {
+          if (!li.hasAttribute('contenteditable')) {
+            li.setAttribute('contenteditable', 'true');
+          }
+        });
+      }
+    }
+
+    if (addItemBtn && shoppingList) {
+      addItemBtn.addEventListener('click', () => {
+        const li = document.createElement('li');
+        li.textContent = 'New item';
+        li.setAttribute('contenteditable', 'true');
+        shoppingList.appendChild(li);
+        li.focus();
+        saveShoppingList();
+      });
+
+      // Save whenever the user finishes editing (blur or keyup)
+      shoppingList.addEventListener('input', () => {
+        saveShoppingList();
+      });
+
+      if (clearListBtn) {
+        clearListBtn.addEventListener('click', () => {
+          if (confirm('Clear the entire shopping list?')) {
+            shoppingList.innerHTML = '';
+            saveShoppingList();
+          }
+        });
+      }
+    }
+
+    // ===== On load: restore settings =====
+    document.addEventListener('DOMContentLoaded', () => {
+      // Temperature preference
+      const useC = localStorage.getItem('useCelsius') === 'true';
+      tempToggle.checked = useC;
+      updateTemps(useC);
+
+      // Shopping list
+      restoreShoppingList();
+    });
+  </script>
+</body>
+</html>
