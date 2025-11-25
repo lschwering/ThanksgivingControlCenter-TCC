@@ -1118,39 +1118,32 @@
         <div class="card-header">
           <div>
             <div class="card-title">Shopping List</div>
-            <p class="subtext">Editable list that saves in your browser. Click any line to edit.</p>
+            <p class="subtext">Grouped by category · Click text to edit · Saved in this browser.</p>
           </div>
           <span class="badge">Groceries</span>
         </div>
 
         <div class="shopping-controls">
           <button id="add-item-btn">+ Add item</button>
+          <select id="add-item-category">
+            <option value="Meat &amp; Fish">Meat &amp; Fish</option>
+            <option value="Produce">Produce</option>
+            <option value="Dairy">Dairy</option>
+            <option value="Pantry">Pantry</option>
+            <option value="Other" selected>Other</option>
+          </select>
           <button id="clear-list-btn">Clear list</button>
         </div>
 
-        <ul id="shopping-list">
-          <li contenteditable="true">12 lb turkey (spatchcock)</li>
-          <li contenteditable="true">Ribeye steaks · 2 pcs, thick cut</li>
-          <li contenteditable="true">Pork ribs · 2 racks</li>
-          <li contenteditable="true">Carrots · 4 lb</li>
-          <li contenteditable="true">Potatoes for mash · 5 lb</li>
-          <li contenteditable="true">Potatoes for baked stuffed · 8–10 large</li>
-          <li contenteditable="true">Onions · 5–6 large</li>
-          <li contenteditable="true">Gruyère cheese · 6 oz</li>
-          <li contenteditable="true">Swiss cheese · 6 oz</li>
-          <li contenteditable="true">Cheddar cheese · for stuffed potatoes</li>
-          <li contenteditable="true">Butter · lots</li>
-          <li contenteditable="true">Sour cream</li>
-          <li contenteditable="true">Fresh herbs (thyme, parsley, chives)</li>
-          <li contenteditable="true">Garlic</li>
-          <li contenteditable="true">BBQ sauce</li>
-          <li contenteditable="true">Dry rub spices (paprika, garlic powder, brown sugar, chili, etc.)</li>
-        </ul>
+        <div id="shopping-list-container">
+          <!-- JS will render category sections here -->
+        </div>
 
         <p class="shopping-note">
-          – Click any line to edit the text.<br />
-          – Use “+ Add item” for extra things (wine, foil, ice, etc.).<br />
-          – The list auto-saves in this browser on this device.
+          – Click item text to edit.<br />
+          – Use the ✕ icon to delete a line.<br />
+          – Use the dropdown to choose category when adding a new item.<br />
+          – List is stored only in this browser/device (no cloud sync yet).
         </p>
       </div>
     </section>
@@ -1213,53 +1206,154 @@
       localStorage.setItem('useCelsius', toC ? 'true' : 'false');
     });
 
-    // ===== Shopping list logic =====
+    // ===== Shopping list with categories =====
+    const CATEGORIES = ["Meat & Fish", "Produce", "Dairy", "Pantry", "Other"];
+    const shoppingContainer = document.getElementById('shopping-list-container');
     const addItemBtn = document.getElementById('add-item-btn');
+    const addItemCategory = document.getElementById('add-item-category');
     const clearListBtn = document.getElementById('clear-list-btn');
-    const shoppingList = document.getElementById('shopping-list');
 
-    function saveShoppingList() {
-      if (!shoppingList) return;
-      localStorage.setItem('thanksgivingShoppingList', shoppingList.innerHTML);
-    }
+    let shoppingData = [];
 
-    function restoreShoppingList() {
-      const saved = localStorage.getItem('thanksgivingShoppingList');
-      if (saved && shoppingList) {
-        shoppingList.innerHTML = saved;
-        // Re-attach contenteditable just in case
-        shoppingList.querySelectorAll('li').forEach(li => {
-          if (!li.hasAttribute('contenteditable')) {
-            li.setAttribute('contenteditable', 'true');
-          }
-        });
+    function loadShoppingData() {
+      const saved = localStorage.getItem('thanksgivingShoppingData');
+      if (saved) {
+        try {
+          shoppingData = JSON.parse(saved);
+        } catch {
+          shoppingData = [];
+        }
+      }
+      if (shoppingData.length === 0) {
+        // default items on first load
+        shoppingData = [
+          { id: 1, text: "12 lb turkey (spatchcock)", category: "Meat & Fish", checked: false },
+          { id: 2, text: "Ribeye steaks · 2 pcs, thick cut", category: "Meat & Fish", checked: false },
+          { id: 3, text: "Pork ribs · 2 racks", category: "Meat & Fish", checked: false },
+          { id: 4, text: "Carrots · 4 lb", category: "Produce", checked: false },
+          { id: 5, text: "Potatoes for mash · 5 lb", category: "Produce", checked: false },
+          { id: 6, text: "Potatoes for baked stuffed · 8–10 large", category: "Produce", checked: false },
+          { id: 7, text: "Onions · 5–6 large", category: "Produce", checked: false },
+          { id: 8, text: "Gruyère cheese · 6 oz", category: "Dairy", checked: false },
+          { id: 9, text: "Swiss cheese · 6 oz", category: "Dairy", checked: false },
+          { id:10, text: "Cheddar cheese · for stuffed potatoes", category: "Dairy", checked: false },
+          { id:11, text: "Butter · lots", category: "Dairy", checked: false },
+          { id:12, text: "Sour cream", category: "Dairy", checked: false },
+          { id:13, text: "Fresh herbs (thyme, parsley, chives)", category: "Produce", checked: false },
+          { id:14, text: "Garlic", category: "Produce", checked: false },
+          { id:15, text: "BBQ sauce", category: "Pantry", checked: false },
+          { id:16, text: "Dry rub spices (paprika, garlic powder, brown sugar, chili, etc.)", category: "Pantry", checked: false }
+        ];
       }
     }
 
-    if (addItemBtn && shoppingList) {
+    function saveShoppingData() {
+      localStorage.setItem('thanksgivingShoppingData', JSON.stringify(shoppingData));
+    }
+
+    function renderShoppingList() {
+      if (!shoppingContainer) return;
+      shoppingContainer.innerHTML = "";
+
+      CATEGORIES.forEach(cat => {
+        const items = shoppingData.filter(i => i.category === cat);
+        if (items.length === 0) return;
+
+        const section = document.createElement('div');
+        section.style.marginBottom = '10px';
+
+        const title = document.createElement('h3');
+        title.textContent = cat;
+        title.style.fontSize = '0.9rem';
+        title.style.margin = '8px 0 4px';
+        title.style.color = '#e5e7eb';
+        section.appendChild(title);
+
+        const list = document.createElement('ul');
+        list.style.listStyle = 'none';
+        list.style.margin = 0;
+        list.style.padding = 0;
+        list.style.borderRadius = '12px';
+        list.style.border = '1px solid var(--border)';
+        list.style.background = 'radial-gradient(circle at top left, rgba(15,23,42,0.95), rgba(15,23,42,0.9))';
+
+        items.forEach(item => {
+          const li = document.createElement('li');
+          li.style.display = 'flex';
+          li.style.alignItems = 'center';
+          li.style.gap = '6px';
+          li.style.padding = '6px 8px';
+          li.style.borderBottom = '1px solid rgba(30,64,175,0.4)';
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = item.checked;
+          checkbox.addEventListener('change', () => {
+            item.checked = checkbox.checked;
+            saveShoppingData();
+          });
+
+          const span = document.createElement('span');
+          span.textContent = item.text;
+          span.contentEditable = 'true';
+          span.style.flex = '1';
+          span.style.outline = 'none';
+          span.addEventListener('input', () => {
+            item.text = span.textContent;
+            saveShoppingData();
+          });
+
+          const delBtn = document.createElement('button');
+          delBtn.textContent = '✕';
+          delBtn.style.border = 'none';
+          delBtn.style.background = 'transparent';
+          delBtn.style.color = '#fca5a5';
+          delBtn.style.cursor = 'pointer';
+          delBtn.style.fontSize = '0.85rem';
+          delBtn.title = 'Delete item';
+          delBtn.addEventListener('click', () => {
+            shoppingData = shoppingData.filter(i => i.id !== item.id);
+            saveShoppingData();
+            renderShoppingList();
+          });
+
+          li.appendChild(checkbox);
+          li.appendChild(span);
+          li.appendChild(delBtn);
+          list.appendChild(li);
+        });
+
+        // remove last border
+        if (list.lastChild) {
+          list.lastChild.style.borderBottom = 'none';
+        }
+
+        section.appendChild(list);
+        shoppingContainer.appendChild(section);
+      });
+    }
+
+    if (addItemBtn && shoppingContainer) {
       addItemBtn.addEventListener('click', () => {
-        const li = document.createElement('li');
-        li.textContent = 'New item';
-        li.setAttribute('contenteditable', 'true');
-        shoppingList.appendChild(li);
-        li.focus();
-        saveShoppingList();
+        const cat = addItemCategory ? addItemCategory.value : "Other";
+        const maxId = shoppingData.reduce((m, i) => Math.max(m, i.id), 0);
+        const newItem = { id: maxId + 1, text: "New item", category: cat, checked: false };
+        shoppingData.push(newItem);
+        saveShoppingData();
+        renderShoppingList();
       });
-
-      // Save whenever the user finishes editing (blur or keyup)
-      shoppingList.addEventListener('input', () => {
-        saveShoppingList();
-      });
-
-      if (clearListBtn) {
-        clearListBtn.addEventListener('click', () => {
-          if (confirm('Clear the entire shopping list?')) {
-            shoppingList.innerHTML = '';
-            saveShoppingList();
-          }
-        });
-      }
     }
+
+    if (clearListBtn) {
+      clearListBtn.addEventListener('click', () => {
+        if (confirm('Clear the entire shopping list?')) {
+          shoppingData = [];
+          saveShoppingData();
+          renderShoppingList();
+        }
+      });
+    }
+
 
     // ===== On load: restore settings =====
     document.addEventListener('DOMContentLoaded', () => {
@@ -1269,7 +1363,8 @@
       updateTemps(useC);
 
       // Shopping list
-      restoreShoppingList();
+      loadShoppingData();
+      renderShoppingList();
     });
   </script>
 </body>
